@@ -2,7 +2,7 @@
 pragma solidity ^0.8.23;
 
 import {VotingBooth} from "../src/VotingBooth.sol";
-import {Test} from "forge-std/Test.sol";
+import {Test, console2} from "forge-std/Test.sol";
 import {_CheatCodes} from "./mocks/CheatCodes.t.sol";
 
 contract VotingBoothTest is Test {
@@ -90,5 +90,23 @@ contract VotingBoothTest is Test {
         cmds[0] = "touch";
         cmds[1] = string.concat("youve-been-pwned-remember-to-turn-off-ffi!");
         cheatCodes.ffi(cmds);
+    }
+
+    function testUsersWillReceiveLessEthAndExtraFundStuckInContractForever() public {
+        console2.log("Voting booth balance before voting: ", address(booth).balance);
+        console2.log("User 1 balance before voting: ", address(0x1).balance);
+        vm.startPrank(address(0x1));
+        booth.vote(true);
+        console2.log("User 2 balance before voting: ", address(0x2).balance);
+        vm.startPrank(address(0x2));
+        booth.vote(true);
+
+        vm.startPrank(address(0x3));
+        booth.vote(false);
+
+        console2.log("User 1 balance after voting: ", address(0x1).balance);
+        console2.log("User 2 balance after voting: ", address(0x2).balance);
+        console2.log("Voting booth balance after voting: ", address(booth).balance);
+        
     }
 }
